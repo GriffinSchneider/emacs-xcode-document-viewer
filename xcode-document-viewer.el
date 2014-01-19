@@ -22,12 +22,12 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;; requires:
-;; w3m
+;; eww
 
 ;; Installation:
 ;; (require 'xcode-document-viewer)
 ;; (setq xcdoc:document-path "/Developer/Platforms/iPhoneOS.platform/Developer/Documentation/DocSets/com.apple.adc.documentation.AppleiPhone3_1.iPhoneLibrary.docset")
-;; (setq xcdoc:open-w3m-other-buffer t) ;if you like
+;; (setq xcdoc:open-eww-other-buffer t) ;if you like
 
 ;; to change docset-path
 ;; M-x xcdoc:set-document-path
@@ -42,14 +42,14 @@
 ;; M-x xcdoc:ask-search
 
 
-(require 'w3m-load)
+(require 'eww)
 (require 'thingatpt)
 (require 'helm)
 (require 'helm-help)
 
 (defcustom xcdoc:document-path nil "")
 
-(defcustom xcdoc:open-w3m-other-buffer nil
+(defcustom xcdoc:open-eww-other-buffer nil
   "")
 
 (defun xcdoc:set-document-path (&optional docset-path)
@@ -118,14 +118,15 @@
      (t
       (error "cant find text like URL!!")))))
 
-;;(w3m-browse-url (xcdoc:extract-html" Objective-C/cl/-/UIView   documentation/UIKit/Reference/UIView_Class/UIView/UIView.html#//apple_ref/occ/cl/UIView"))
-(defun xcdoc:open-w3m (url &optional new-session)
+;;(eww-browse-url (xcdoc:extract-html" Objective-C/cl/-/UIView   documentation/UIKit/Reference/UIView_Class/UIView/UIView.html#//apple_ref/occ/cl/UIView"))
+(defun xcdoc:open-eww (url &optional new-session)
   (cond
-   (xcdoc:open-w3m-other-buffer
-    (let ((b (save-window-excursion (w3m-browse-url (xcdoc:extract-html url) new-session) (get-buffer "*w3m*"))))
-      (ignore-errors (save-selected-window (pop-to-buffer "*w3m*")))))
+   (xcdoc:open-eww-other-buffer
+    (let ((b (save-window-excursion (eww-open-file (xcdoc:extract-html url)) (get-buffer "*eww*"))))
+      (ignore-errors (save-selected-window (pop-to-buffer "*eww*")))))
    (t
-    (wq3m-browse-url (xcdoc:extract-html url) new-session))))
+    (message (xcdoc:extract-html url))
+    (eww-open-file (xcdoc:extract-html url)))))
 
 
 (defun xcdoc:search-source ()
@@ -138,8 +139,8 @@
     (volatile)
     (delayed)
     (requires-pattern . 2)
-    (action . (("w3m" . xcdoc:open-w3m)
-               ("w3m new-session" . (lambda (c) (xcdoc:open-w3m c t)))))))
+    (action . (("eww" . xcdoc:open-eww)
+               ("eww new-session" . (lambda (c) (xcdoc:open-eww c t)))))))
 
 (defun* xcdoc:search-at-point-source-candidates
     (&optional (query (with-current-buffer helm-current-buffer
@@ -152,8 +153,8 @@
 (defun xcdoc:search-at-point-source (&optional query)
   `((name . ,(xcdoc:document-path))
     (candidates . (lambda () (xcdoc:search-at-point-source-candidates ,query)))
-    (action . (("w3m" . xcdoc:open-w3m)
-               ("w3m new-session" . (lambda (c) (xcdoc:open-w3m c t)))))))
+    (action . (("eww" . xcdoc:open-eww)
+               ("eww new-session" . (lambda (c) (xcdoc:open-eww c t)))))))
 
 (defun xcdoc:search ()
   (interactive)
